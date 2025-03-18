@@ -68,6 +68,7 @@
 3. **Start a kafka Consumer to read messages**:
    - bin/kafka-console-consumer.sh --topic test-topic --from-beginning --bootstrap-server
    - localhost:9092
+
 ![WhatsApp Image 2025-03-18 at 23 48 43_79933298](https://github.com/user-attachments/assets/6413e0d1-26cc-4f89-85de-a9cb4ea90077)
 ---
 
@@ -94,6 +95,7 @@
    - sudo systemctl enable prometheus
 9. **Check if Prometheus is running**:
    - sudo systemctl status prometheus
+
 ![Screenshot 2025-03-13 012612](https://github.com/user-attachments/assets/89d2055c-3e80-49e0-8f4a-274e01014679)
 
 ![Screenshot 2025-03-13 012538](https://github.com/user-attachments/assets/fdb0e846-2c4b-445e-9de3-39e5ce9a284d)
@@ -118,4 +120,5 @@
        - sudo swapon /swapfile
 
 #### **Output achieved after Troubleshoot**:
+
 ![Screenshot 2025-03-17 224012](https://github.com/user-attachments/assets/87402548-6fec-4f4e-a4c1-54afcc185ddd)
