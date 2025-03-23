@@ -118,7 +118,12 @@
        - sudo mkswap /swapfile
   - **Enable the swap**:
        - sudo swapon /swapfile
-
 #### **Output achieved after Troubleshoot**:
+
+#### **Note**:
+   - **Change the timeout settings of the Zoopkeeper**:
+       - change Zoopkeeper timeout settings from 0 to any arbitrary higher number(seconds) to avoid server timeout settings.
+   - **Avoid using 9092 port**:
+       - it might be blocked sometimes.
 
 ![Screenshot 2025-03-17 224012](https://github.com/user-attachments/assets/87402548-6fec-4f4e-a4c1-54afcc185ddd)
