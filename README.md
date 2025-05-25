@@ -1,5 +1,15 @@
 # Capacity-Advisor-for-Monitoring-Resources
 
+
+## 🗓️ Weekly Checkpoint 
+
+### ✅ Goals for This Week
+- [X] Stress Testing on Disk Usage/CPU Load
+- [X] Training the model with the stress test results.
+- [ ] pushing all code to Github
+
+
+
 ## Architecture Diagram
 ![image](https://github.com/user-attachments/assets/9cb9bec2-1895-4686-939a-43d7cf334cdb)
 
