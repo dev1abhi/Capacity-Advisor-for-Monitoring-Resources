@@ -6,7 +6,7 @@
 ### ✅ Goals for This Week
 - [X] Stress Testing on Disk Usage/CPU Load
 - [X] Training the model with the stress test results.
-- [ ] pushing all code to Github
+- [X] Pushing all code to Github
 
 
 
