@@ -11,7 +11,7 @@
 
 
 ## Architecture Diagram
-![Untitled-2025-05-26-1842](https://github.com/user-attachments/assets/54bb803e-b5f1-4d2f-8026-5715d59f15b8)
+<img src="https://github.com/user-attachments/assets/54bb803e-b5f1-4d2f-8026-5715d59f15b8" width="600"/>
 
 
 # Week 1: Setting Up Apache Kafka and Prometheus on AWS EC2 (Linux)
