@@ -30,6 +30,10 @@ else
   apt install -y openjdk-17-jre-headless
 fi
 
+# JAVA_HOME
+JAVA_HOME_PATH=$(dirname $(dirname $(readlink -f $(which java))))
+echo "[i] Detected JAVA_HOME: $JAVA_HOME_PATH"
+
 for pkg in wget curl tar unzip; do
   if ! command -v $pkg &>/dev/null; then
     echo "[*] Installing $pkg..."
@@ -169,10 +173,95 @@ fi
 KAFKA_CONFIG="$KAFKA_DIR/config/server.properties"
 sed -i "s|^#*advertised.listeners=.*|advertised.listeners=PLAINTEXT://${ADVERTISE_IP}:9092|" $KAFKA_CONFIG
 
-echo "[*] Patching Kafka start script with JMX agent..."
+
+
 KAFKA_START="$KAFKA_DIR/bin/kafka-server-start.sh"
-sed -i '1iexport KAFKA_HEAP_OPTS="-Xmx256M -Xms128M"' $KAFKA_START
-sed -i "2iexport KAFKA_OPTS=\"\$KAFKA_OPTS -javaagent:$JMX_DIR/jmx_prometheus_javaagent-$JMX_EXPORTER_VERSION.jar=$JMX_PORT:$JMX_DIR/kafka-jmx-config.yaml\"" $KAFKA_START
+JMX_AGENT_LINE='export KAFKA_OPTS="\$KAFKA_OPTS -javaagent:'"$JMX_DIR"'/jmx_prometheus_javaagent-'"$JMX_EXPORTER_VERSION"'.jar='"$JMX_PORT"':'"$JMX_DIR"'/kafka-jmx-config.yaml"'
+
+# Default heap sizes
+DEFAULT_XMS="1G"
+DEFAULT_XMX="1G"
+
+# Ask for initial heap (-Xms)
+echo -n "[?] Enter Kafka initial heap size (-Xms) (e.g. 1G, 512M) [default: $DEFAULT_XMS]: "
+read USER_XMS
+if [[ -z "$USER_XMS" ]]; then
+  USER_XMS=$DEFAULT_XMS
+fi
+
+# Ask for max heap (-Xmx)
+echo -n "[?] Enter Kafka max heap size (-Xmx) (e.g. 2G, 1G) [default: $DEFAULT_XMX]: "
+read USER_XMX
+if [[ -z "$USER_XMX" ]]; then
+  USER_XMX=$DEFAULT_XMX
+fi
+
+validate_heap_size() {
+  local heap=$1
+  local heap_num=$(echo "$heap" | grep -oP '^\d+')
+  local heap_unit=$(echo "$heap" | grep -oP '[GM]$' | tr 'gm' 'GM')
+
+  if [[ -z "$heap_num" || -z "$heap_unit" ]]; then
+    return 1
+  fi
+
+  if [[ "$heap_unit" == "G" && $heap_num -lt 1 ]]; then
+    return 1
+  elif [[ "$heap_unit" == "M" && $heap_num -lt 1024 ]]; then
+    return 1
+  fi
+
+  return 0
+}
+
+# Validate initial heap (-Xms)
+if ! validate_heap_size "$USER_XMS"; then
+  echo "[!] Invalid or too small initial heap size (-Xms). Using default: $DEFAULT_XMS"
+  USER_XMS=$DEFAULT_XMS
+fi
+
+# Validate max heap (-Xmx)
+if ! validate_heap_size "$USER_XMX"; then
+  echo "[!] Invalid or too small max heap size (-Xmx). Using default: $DEFAULT_XMX"
+  USER_XMX=$DEFAULT_XMX
+fi
+
+# Ensure max heap is >= initial heap (simple numeric check ignoring units)
+num_xms=$(echo "$USER_XMS" | grep -oP '^\d+')
+num_xmx=$(echo "$USER_XMX" | grep -oP '^\d+')
+
+unit_xms=$(echo "$USER_XMS" | grep -oP '[GM]$' | tr 'gm' 'GM')
+unit_xmx=$(echo "$USER_XMX" | grep -oP '[GM]$' | tr 'gm' 'GM')
+
+convert_to_mb() {
+  local num=$1
+  local unit=$2
+  if [[ "$unit" == "G" ]]; then
+    echo $((num * 1024))
+  else
+    echo "$num"
+  fi
+}
+
+xms_mb=$(convert_to_mb $num_xms $unit_xms)
+xmx_mb=$(convert_to_mb $num_xmx $unit_xmx)
+
+if (( xmx_mb < xms_mb )); then
+  echo "[!] Max heap (-Xmx) must be greater than or equal to initial heap (-Xms). Adjusting max heap to $USER_XMS."
+  USER_XMX=$USER_XMS
+fi
+
+HEAP_LINE="export KAFKA_HEAP_OPTS=\"-Xmx${USER_XMX} -Xms${USER_XMS}\""
+
+echo "[*] Safely patching Kafka start script with JMX agent..."
+# Only patch if not already present
+if ! grep -q "$JMX_AGENT_LINE" "$KAFKA_START"; then
+    echo "[*] Inserting JMX and heap export lines after shebang..."
+    sed -i "1a$HEAP_LINE" "$KAFKA_START"
+    sed -i "2a$JMX_AGENT_LINE" "$KAFKA_START"
+else
+    echo "[*] Kafka start script already patched. Skipping."
+fi
 
 # ========== SERVICE FILES ==========
 
@@ -229,6 +318,8 @@ After=zookeeper.service
 
 [Service]
 Type=simple
+Environment="JAVA_HOME=$JAVA_HOME_PATH"
+Environment="KAFKA_HEAP_OPTS=-Xmx${USER_XMX} -Xms${USER_XMS}"
 ExecStart=$KAFKA_DIR/bin/kafka-server-start.sh $KAFKA_DIR/config/server.properties
 Restart=on-abnormal
 
