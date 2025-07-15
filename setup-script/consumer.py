@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/19oOT4bvv-veWPqP_3wblUSqdaNBsYNn6
 """
 
-!pip install kafka-python==1.4.7 --force-reinstall
+# pip install kafka-python before running this script
 
 from kafka import KafkaConsumer
 import json

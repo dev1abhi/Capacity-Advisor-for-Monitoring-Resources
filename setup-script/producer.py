@@ -8,10 +8,10 @@ Original file is located at
 """
 
 # Clean old versions
-!pip uninstall -y kafka-python kafka
+# If needed, uninstall kafka-python and kafka using pip in your terminal.
 
 # Install the working version
-!pip install kafka-python==1.4.7
+# If needed, install kafka-python==1.4.7 using pip in your terminal.
 
 from kafka import KafkaProducer
 import json
@@ -32,6 +32,7 @@ print("KafkaProducer initialized successfully!")
 
 topic = "demo_testing2"
 
+# test data generation
 try:
     while True:
         messages_to_send = random.randint(100, 200)

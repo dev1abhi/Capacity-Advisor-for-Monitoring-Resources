@@ -2,6 +2,10 @@
 
 set -e
 
+# This script sets up a monitoring environment for Kafka, including Zookeeper, Prometheus, Node Exporter, and JMX Exporter.
+# It installs necessary packages, downloads required software, configures services, and sets up systemd service files.
+# You can update the versions of the software as needed.
+
 # ---------- CONFIG ----------
 JMX_PORT=7071
 NODE_EXPORTER_VERSION="1.9.0"
