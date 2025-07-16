@@ -1,0 +1,46 @@
+# config.yaml
+
+prometheus_url: "http://100.27.223.212:9090"
+email: anuragb745@gmail.com"
+thresholds:
+  crash_threshold: 0.2
+  forecast_horizon: 12
+  min_train_samples: 500
+  model_retrain_interval: 86400  # in seconds
+  alert_interval: 60             # in seconds
+
+normal_ranges:
+  messages_in: [80, 140]
+  cpu_usage: [1.0, 85.0]
+  memory_usage: [60.0, 90.0]
+  disk_usage: [50.0, 90.0]
+
+severity_levels:
+  critical: 0.9
+  high: 0.7
+  medium: 0.5
+  low: 0.3
+
+file_paths:
+  historical_data: "combined.csv"
+  labeled_data: "labeled_kafka_metrics.csv"
+  model_file: "kafka_crash_classifier.pkl"
+  forecaster_file: "kafka_forecasters.pkl"
+
+metrics:
+  kafka:
+    messages_in: "kafka_server_BrokerTopicMetrics_MessagesInPerSec_1m_rate"
+    bytes_in: "kafka_server_BrokerTopicMetrics_BytesInPerSec_1m_rate"
+    bytes_out: "kafka_server_BrokerTopicMetrics_BytesOutPerSec_1m_rate"
+  node:
+    cpu_usage: "100 - (avg by (instance)(rate(node_cpu_seconds_total{mode='idle'}[1m])) * 100)"
+    memory_usage: "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100"
+    disk_usage: "(1 - (node_filesystem_free_bytes{mountpoint='/'} / node_filesystem_size_bytes{mountpoint='/'})) * 100"
+
+
+alert_api:
+  enabled: true
+  url: "https://your-api-url.com/alert"
+  headers:
+    Content-Type: "application/json"
+    Authorization: "Bearer your-token"

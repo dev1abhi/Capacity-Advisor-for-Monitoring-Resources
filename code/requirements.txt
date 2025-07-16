@@ -1,0 +1,9 @@
+pandas
+numpy
+requests
+joblib
+scikit-learn
+lightgbm
+prophet
+apscheduler
+matplotlib
